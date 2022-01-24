@@ -2,6 +2,7 @@
 react/node_modules/
 react/build/
 react/uploads/
+react/public/api/CONFIG.php
 
 # Executables
 *.mwb

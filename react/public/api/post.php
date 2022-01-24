@@ -61,7 +61,7 @@ class Post {
     }
     static function GetChildren($id){
         $result = array();
-        $temp = Post::GetAnyData($id, "SELECT `id` FROM `posts` WHERE `parent_id`=?");
+        $temp = Post::GetAnyData($id, "SELECT `id` FROM `posts` INNER JOIN `post_descriptions` ON `id`=`posts_id` AND `parent_id`=? ORDER BY `score` DESC");
         if ($temp!=null) $result['children'] = array_column($temp, 'id'); else $result["children"]=array();
         return $result;
     }
