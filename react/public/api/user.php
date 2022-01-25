@@ -43,7 +43,7 @@ class User {
         if ($queryResult->num_rows == 1){
             $result = $queryResult->fetch_object();
             if ($result->result=="Success"){
-                $_SESSION['user'] = $user;
+                $_SESSION['user'] = array_column(User::GetAnyData($user, "SELECT `user` FROM `users` WHERE `user`=?"), "user", "string")[0];
                 return array('user'=>$_SESSION['user'], 'logged'=>1, 'result'=>'Sikeres bejelentkezés!');
             }else{
                 $_SESSION['user'] = '';

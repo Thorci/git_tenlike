@@ -249,6 +249,7 @@ class UserEditor extends React.Component {
             inputProfile: User.loggedUser.profile,
             inputPassword: '',
             inputNewPassword: '',
+            inputReNewPassword: '',
             inputDeletePassword: ''
         };
         User.loggedUser.addOnChangeMethod("editor", ()=>{
@@ -275,7 +276,8 @@ class UserEditor extends React.Component {
                 
                 <input placeholder="Password" type="password" value={this.state.inputPassword} onChange={(e) => {this.setState({inputPassword: e.target.value})}} className="form-control"/>
                 <input placeholder="New password" type="password" value={this.state.inputNewPassword} onChange={(e) => {this.setState({inputNewPassword: e.target.value})}} className="form-control"/>
-                <button type="button" className="btn btn-primary" onClick={()=>{User.SetPassword(this.state.inputPassword, this.state.inputNewPassword);}}>Change password</button>
+                <input placeholder="Repeat new password" type="password" value={this.state.inputReNewPassword} onChange={(e) => {this.setState({inputReNewPassword: e.target.value})}} className="form-control"/>
+                <button type="button" className="btn btn-primary" onClick={()=>{if (this.state.inputReNewPassword==this.state.inputNewPassword) User.SetPassword(this.state.inputPassword, this.state.inputNewPassword); else alert('A jelszót hibásan ismételte meg!');}}>Change password</button>
 
                 <input placeholder="Password" type="password" value={this.state.inputDeletePassword} onChange={(e) => {this.setState({inputDeletePassword: e.target.value})}} className="form-control"/>
                 <button type="button" className="btn btn-primary" onClick={()=>{User.Delete(this.state.inputDeletePassword);}}>Delete account</button>
