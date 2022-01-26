@@ -346,7 +346,7 @@ class User {
     static function requestHandler(){
         if (isset($_GET['request'])){
             switch ($_GET['request']){
-                case 'verification'         : return User::verification($_GET['user'], $_GET['code']); break;
+                case 'verification'         : return User::verification($_GET['user'], $_GET['code'])->result; break;
                 case 'basic'                : return User::GetBasic($_GET['user']); break;   
                 case 'logged'               : return User::logged(); break;
                 case 'subscribed'           : return User::Subscribed($_GET["subscribe"]); break;
