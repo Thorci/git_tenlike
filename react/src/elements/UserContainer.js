@@ -211,6 +211,7 @@ class UserLogin extends React.Component {
                         <li><input type="text" value={this.state.inputLoginUser} onChange={(e) => {this.setState({inputLoginUser: e.target.value});}} placeholder="Felhasználónév"></input></li>
                         <li><input type="password" value={this.state.inputLoginPW} onChange={(e) => {this.setState({inputLoginPW: e.target.value});}} placeholder="Jelszó"></input></li>
                         <li><button onClick = {()=>{User.Login(this.state.inputLoginUser,this.state.inputLoginPW);}}>Bejelentkezés</button></li>
+                        <li><button onClick = {()=>{User.passwordRecoveryRequest(this.state.inputLoginUser);}}>Elfelejtett jelszó</button></li>
                         <li><h4>Vagy regisztrálj!</h4></li>
                         <li><input type="text" value={this.state.inputRegUser}      onChange={(e) => {this.setState({inputRegUser: e.target.value});}} placeholder="Felhasználónév"></input></li>
                         <li><input type="text" value={this.state.inputRegEmail}     onChange={(e) => {this.setState({inputRegEmail: e.target.value});}} placeholder="Email"></input></li>

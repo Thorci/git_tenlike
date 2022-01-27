@@ -58,6 +58,7 @@ class User{
     static Delete(password)                 {User.loggedUser._postData({action:"delete", password: password});}
     static UploadProfileIMG(imgfile)        {User.loggedUser._postData({action:"uploadimg", img: imgfile});}
     static DeleteProfileIMG()               {User.loggedUser._postData({action:"deleteimg"});}
+    static passwordRecoveryRequest(user)    {User.loggedUser._sendRequest("GET", User.HOST+'?request=passwordrecoveryrequest&user='+user);}
 
 
 

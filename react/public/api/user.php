@@ -151,7 +151,7 @@ class User {
     }
 
     static function passwordRecoveryRequest($user){
-        return User::GetAnyData($user, "SELECT user_password_recovery_request(?) AS result");
+        return User::GetAnyData($user, "SELECT user_password_recovery_request(?) AS result")[0];
     }
 
     static function passwordRecovery($user, $code){
