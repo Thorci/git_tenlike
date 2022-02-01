@@ -97,7 +97,6 @@ class User {
 
         if ($queryResult->num_rows == 1){
             $result = $queryResult->fetch_object();
-            if (is_numeric($result->result)){$result->result = "Sikeres regisztráció!";}
             return (object) $result;
         }
         return (object) array('Err'=>'404');
@@ -138,6 +137,26 @@ class User {
     static function verification($user, $code){
         $conn = new DB_conn();
         $stmt = $conn->mysqli->prepare("SELECT user_verification(?, ?) AS result");
+        $stmt->bind_param('si', $user, $code);
+        $stmt->execute();
+        $queryResult = $stmt->get_result();
+        $stmt->close();
+        unset($conn);
+
+        if ($queryResult->num_rows == 1){
+            $result = $queryResult->fetch_object();
+            return (object) $result;
+        }
+        return (object) array('Err'=>'404');
+    }
+
+    static function passwordRecoveryRequest($user){
+        return User::GetAnyData($user, "SELECT user_password_recovery_request(?) AS result")[0];
+    }
+
+    static function passwordRecovery($user, $code){
+        $conn = new DB_conn();
+        $stmt = $conn->mysqli->prepare("SELECT user_password_recovery(?, ?) AS result");
         $stmt->bind_param('si', $user, $code);
         $stmt->execute();
         $queryResult = $stmt->get_result();
@@ -363,6 +382,8 @@ class User {
         if (isset($_GET['request'])){
             switch ($_GET['request']){
                 case 'verification'         : return User::verification($_GET['user'], $_GET['code'])->result; break;
+                case 'passwordrecoveryrequest'  : return User::passwordRecoveryRequest($_GET['user']); break;
+                case 'passwordrecovery'     : return User::passwordRecovery($_GET['user'], $_GET['code']); break;
                 case 'basic'                : return User::GetBasic($_GET['user']); break;   
                 case 'logged'               : return User::logged(); break;
                 case 'subscribed'           : return User::Subscribed($_GET["subscribe"]); break;
