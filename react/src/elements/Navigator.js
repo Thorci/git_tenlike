@@ -55,6 +55,7 @@ class Navigator extends React.Component {
     render(){
         return (
             <div>
+                <img src="favicon.png" height={50} width={50}></img>
                 <button className={this.PrevAvailable()?'':'bg-secondary'} onClick={()=>{this.Previous();}}>Vissza</button>
                 <button className={this.NextAvailable()?'':'bg-secondary'} onClick={()=>{this.Next();}}>Előre</button>
                 {this.sequence.map((el, index)=>{

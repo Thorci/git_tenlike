@@ -58,6 +58,7 @@ class User{
     static Delete(password)                 {User.loggedUser._postData({action:"delete", password: password});}
     static UploadProfileIMG(imgfile)        {User.loggedUser._postData({action:"uploadimg", img: imgfile});}
     static DeleteProfileIMG()               {User.loggedUser._postData({action:"deleteimg"});}
+    static SetEmail(password, email)        {User.loggedUser._postData({action:"setemail", password: password, email: email});}
 
 
 

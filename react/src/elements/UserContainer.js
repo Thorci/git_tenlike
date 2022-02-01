@@ -250,14 +250,18 @@ class UserEditor extends React.Component {
             inputPassword: '',
             inputNewPassword: '',
             inputReNewPassword: '',
-            inputDeletePassword: ''
+            inputDeletePassword: '',
+            inputEmailPassword: '',
+            inputNewEmail: ''
         };
         User.loggedUser.addOnChangeMethod("editor", ()=>{
             this.state.inputDescription = User.loggedUser.description;
             this.state.inputProfile = User.loggedUser.profile;
+            this.state.inputNewEmail=User.loggedUser.email;
             this.forceUpdate();});
         User.loggedUser.GetDescription();
         User.loggedUser.GetProfile();
+        User.loggedUser.GetBasicData();
     }
     render(){
         return (
@@ -273,7 +277,11 @@ class UserEditor extends React.Component {
                 
                 <textarea placeholder="Profile" value={this.state.inputProfile} onChange={(e) => {this.setState({inputProfile: e.target.value})}} className="form-control" rows="3"/>
                 <button type="button" className="btn btn-primary" onClick={()=>{User.SetProfile(this.state.inputProfile);}}>Save Profile</button>
-                
+  
+                <input placeholder="Password" type="password" value={this.state.inputEmailPassword} onChange={(e) => {this.setState({inputEmailPassword: e.target.value})}} className="form-control"/>
+                <input placeholder="New Email" type="email" value={this.state.inputNewEmail} onChange={(e) => {this.setState({inputNewEmail: e.target.value})}} className="form-control"/>
+                <button type="button" className="btn btn-primary" onClick={()=>{User.SetEmail(this.state.inputEmailPassword, this.state.inputNewEmail)}}>Change Email</button>
+
                 <input placeholder="Password" type="password" value={this.state.inputPassword} onChange={(e) => {this.setState({inputPassword: e.target.value})}} className="form-control"/>
                 <input placeholder="New password" type="password" value={this.state.inputNewPassword} onChange={(e) => {this.setState({inputNewPassword: e.target.value})}} className="form-control"/>
                 <input placeholder="Repeat new password" type="password" value={this.state.inputReNewPassword} onChange={(e) => {this.setState({inputReNewPassword: e.target.value})}} className="form-control"/>

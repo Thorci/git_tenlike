@@ -179,6 +179,22 @@ class User {
         return (object) array('result'=>'Leírás módosítva!', 'description'=>$description);
     }
 
+    static function SetEmail($password, $email){
+        $conn = new DB_conn();
+        $stmt = $conn->mysqli->prepare("SELECT user_set_email(?,?,?) AS result ");
+        $stmt->bind_param('sss', $_SESSION['user'], $password, $email);
+        $stmt->execute();
+        $queryResult = $stmt->get_result();
+        $stmt->close();
+        unset($conn);
+
+        if ($queryResult->num_rows == 1){
+            $result = $queryResult->fetch_object();
+            return (object) $result;
+        }
+        return (object) array();
+    }
+
 
 //Adatlekérések
     static function logged(){
@@ -189,10 +205,10 @@ class User {
         }
     }
     public static function GetBasic($user){
-        $result = User::GetAnyData($user, "SELECT `user` FROM `users` WHERE `user`=?")[0];
+        $result = User::GetAnyData($user, "SELECT `user`, `email` FROM `users` WHERE `user`=?")[0];
         $protects = User::GetAnyData($user, "SELECT user_get_available_protects(?) AS protects")[0];
         $result = array_merge($result, $protects);
-        if (isset($_SESSION['user']) && $result['user']==$_SESSION['user']) $result['logged'] = 1; else {$result['logged']=0; $result['protects']="";};
+        if (isset($_SESSION['user']) && $result['user']==$_SESSION['user']) $result['logged'] = 1; else {$result['logged']=0; $result['email']=""; $result['protects']="";};
         $result = array_merge($result, (array) User::Subscribed($user));
         $result['basic']=1;
         return $result;
@@ -374,6 +390,7 @@ class User {
                 case 'setprofile'           : return User::SetProfile($_POST['profile']); break;  
                 case 'setdescription'       : return User::SetDescription($_POST['description']); break; 
                 case 'setpassword'          : return User::SetPassword($_POST['password'], $_POST['newpassword']); break;  
+                case 'setemail'             : return User::SetEmail($_POST['password'], $_POST['email']); break;  
                 case 'delete'               : return User::Delete($_POST['password']); break;  
                 case 'uploadimg'            : return User::UploadIMG(); break;    
                 case 'deleteimg'            : return User::DeleteIMG(); break;  
