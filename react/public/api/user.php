@@ -8,21 +8,8 @@ $_GET['ctype'] ='json';
 
 class User {
 
-    static function Query(string $query, string $types, $inputs){
-        $conn = new DB_conn();
-        $stmt = $conn->mysqli->prepare($query);
-        if ($types!=''){
-            $stmt->bind_param($types, ...$inputs);
-        }
-        $stmt->execute();
-        $queryResult = $stmt->get_result();
-        $stmt->close();
-        unset($conn);
-        if (gettype($queryResult)=='boolean'){
-            return array('result'=>$queryResult);
-        }
-        return $queryResult->fetch_all(MYSQLI_ASSOC);
-    }
+    public static function Query (string $query, string $types, $inputs){return Query($query, $types, $inputs);}
+
 
 //Műveletek
     static function login($user, $password){
@@ -283,16 +270,6 @@ class User {
         }
     }
 }
-
-
-
-
-
-
-
-
-
-
 
 
 
