@@ -8,166 +8,65 @@ $_GET['ctype'] ='json';
 
 class User {
 
-
-    static function GetAnyData(string $user, string $queryString){
+    static function Query(string $query, string $types, $inputs){
         $conn = new DB_conn();
-        if ($user==0){
-            $queryResult = $conn->mysqli->query($queryString);
-            unset($conn);
-            return $queryResult->fetch_all(MYSQLI_ASSOC);
-        }//else
-
-        $stmt = $conn->mysqli->prepare($queryString);
-        $stmt->bind_param('s', $user);
+        $stmt = $conn->mysqli->prepare($query);
+        if ($types!=''){
+            $stmt->bind_param($types, ...$inputs);
+        }
         $stmt->execute();
         $queryResult = $stmt->get_result();
         $stmt->close();
         unset($conn);
+        if (gettype($queryResult)=='boolean'){
+            return array('result'=>$queryResult);
+        }
         return $queryResult->fetch_all(MYSQLI_ASSOC);
     }
 
-
-
-
-
 //Műveletek
     static function login($user, $password){
-        $conn = new DB_conn();
-        $stmt = $conn->mysqli->prepare("SELECT user_login(?, ?) AS result");
-        $stmt->bind_param('ss', $user, $password);
-        $stmt->execute();
-        $queryResult = $stmt->get_result();
-        $stmt->close();
-        unset($conn);
-
-        if ($queryResult->num_rows == 1){
-            $result = $queryResult->fetch_object();
-            if ($result->result=="Success"){
-                $_SESSION['user'] = array_column(User::GetAnyData($user, "SELECT `user` FROM `users` WHERE `user`=?"), "user", "string")[0];
-                return array('user'=>$_SESSION['user'], 'logged'=>1, 'result'=>'Sikeres bejelentkezés!');
-            }else{
-                $_SESSION['user'] = '';
-                return array('user'=>$_SESSION['user'], 'logged'=>0, 'result'=>$result->result);
-            }
+        $result = User::Query("SELECT user_login(?, ?) AS result", 'ss', [$user, $password])[0];
+        if ($result['result']=="Success"){
+            $_SESSION['user'] = array_column(User::Query("SELECT `user` FROM `users` WHERE `user`=?", 's', [$user]), "user", "string")[0];
+            return array('user'=>$_SESSION['user'], 'logged'=>1, 'result'=>'Sikeres bejelentkezés!');
+        }else{
+            $_SESSION['user'] = '';
+            return array('user'=>$_SESSION['user'], 'logged'=>0, 'result'=>$result['result']);
         }
-        return (object) array('result'=>'Error');
     }
 
     static function Subscribe($subscribe){
-        $conn = new DB_conn();
-        $stmt = $conn->mysqli->prepare("SELECT user_subscribe(?, ?) AS result");
-        $stmt->bind_param('ss', $_SESSION['user'], $subscribe);
-        $stmt->execute();
-        $queryResult = $stmt->get_result();
-        $stmt->close();
-        unset($conn);
-
-        if ($queryResult->num_rows == 1){
-            $result = $queryResult->fetch_object();
-            return (object) $result;
-        }
-        return (object) array('Err'=>'404');
+       return User::Query("SELECT user_subscribe(?, ?) AS result", 'ss', [$_SESSION['user'], $subscribe])[0];
     }
     
     static function Unsubscribe($subscribe){
-        $conn = new DB_conn();
-        $stmt = $conn->mysqli->prepare("SELECT user_unsubscribe(?, ?) AS result");
-        $stmt->bind_param('ss', $_SESSION['user'], $subscribe);
-        $stmt->execute();
-        $queryResult = $stmt->get_result();
-        $stmt->close();
-        unset($conn);
-
-        if ($queryResult->num_rows == 1){
-            $result = $queryResult->fetch_object();
-            return (object) $result;
-        }
-        return (object) array('Err'=>'404');
+       return User::Query("SELECT user_unsubscribe(?, ?) AS result", 'ss', [$_SESSION['user'], $subscribe])[0];
     }
 
 
     static function registration($user, $email, $password){
-        $conn = new DB_conn();
-        $stmt = $conn->mysqli->prepare("SELECT user_new(?, ?, ?) AS result");
-        $stmt->bind_param('sss', $user, $email, $password);
-        $stmt->execute();
-        $queryResult = $stmt->get_result();
-        $stmt->close();
-        unset($conn);
-
-        if ($queryResult->num_rows == 1){
-            $result = $queryResult->fetch_object();
-            return (object) $result;
-        }
-        return (object) array('Err'=>'404');
+        return User::Query("SELECT user_new(?, ?, ?) AS result", 'sss', [$user, $email, $password])[0];
     }
 
     static function Delete($password){
-        $conn = new DB_conn();
-        $stmt = $conn->mysqli->prepare("SELECT user_delete(?, ?) AS result");
-        $stmt->bind_param('ss', $_SESSION['user'], $password);
-        $stmt->execute();
-        $queryResult = $stmt->get_result();
-        $stmt->close();
-        unset($conn);
-
-        if ($queryResult->num_rows == 1){
-            $result = $queryResult->fetch_object();
-            return (object) $result;
-        }
-        return (object) array('Err'=>'404');
+        return User::Query("SELECT user_delete(?, ?) AS result", 'ss', [$_SESSION['user'], $password])[0];
     }
 
     static function SetPassword($password, $newPassword){
-        $conn = new DB_conn();
-        $stmt = $conn->mysqli->prepare("SELECT user_set_password(?, ?, ?) AS result");
-        $stmt->bind_param('sss', $_SESSION['user'], $password, $newPassword);
-        $stmt->execute();
-        $queryResult = $stmt->get_result();
-        $stmt->close();
-        unset($conn);
-
-        if ($queryResult->num_rows == 1){
-            $result = $queryResult->fetch_object();
-            return (object) $result;
-        }
-        return (object) array('Err'=>'404');
+        return User::Query("SELECT user_set_password(?, ?, ?) AS result", 'sss', [$_SESSION['user'], $password, $newPassword])[0];
     }
 
     static function verification($user, $code){
-        $conn = new DB_conn();
-        $stmt = $conn->mysqli->prepare("SELECT user_verification(?, ?) AS result");
-        $stmt->bind_param('si', $user, $code);
-        $stmt->execute();
-        $queryResult = $stmt->get_result();
-        $stmt->close();
-        unset($conn);
-
-        if ($queryResult->num_rows == 1){
-            $result = $queryResult->fetch_object();
-            return (object) $result;
-        }
-        return (object) array('Err'=>'404');
+        return User::Query("SELECT user_verification(?, ?) AS result", 'si', [$user, $code])[0];
     }
 
     static function passwordRecoveryRequest($user){
-        return User::GetAnyData($user, "SELECT user_password_recovery_request(?) AS result")[0];
+        return User::Query("SELECT user_password_recovery_request(?) AS result", 's', [$user])[0];
     }
 
     static function passwordRecovery($user, $code){
-        $conn = new DB_conn();
-        $stmt = $conn->mysqli->prepare("SELECT user_password_recovery(?, ?) AS result");
-        $stmt->bind_param('si', $user, $code);
-        $stmt->execute();
-        $queryResult = $stmt->get_result();
-        $stmt->close();
-        unset($conn);
-
-        if ($queryResult->num_rows == 1){
-            $result = $queryResult->fetch_object();
-            return (object) $result;
-        }
-        return (object) array('Err'=>'404');
+        return User::Query("SELECT user_password_recovery(?, ?) AS result", 'si', [$user, $code])[0];
     }
 
     static function logout(){
@@ -177,41 +76,17 @@ class User {
     }
 
     static function SetProfile($profile){
-        $conn = new DB_conn();
-        $stmt = $conn->mysqli->prepare("REPLACE into `user_profiles` (`user`, `profile`) values(?, ?)");
-        $stmt->bind_param('ss', $_SESSION['user'], $profile);
-        $stmt->execute();
-        $stmt->close();
-        unset($conn);
-
+        User::Query("REPLACE into `user_profiles` (`user`,`profile`) values(?, ?)", 'ss', [$_SESSION['user'], $profile]);
         return (object) array('result'=>'Profil módosítva!', 'profile'=>$profile);
     }
 
     static function SetDescription($description){
-        $conn = new DB_conn();
-        $stmt = $conn->mysqli->prepare("REPLACE into `user_descriptions` (`user`, `description`) values(?, ?)");
-        $stmt->bind_param('ss', $_SESSION['user'], $description);
-        $stmt->execute();
-        $stmt->close();
-        unset($conn);
-        
+        User::Query("REPLACE into `user_descriptions` (`user`, `description`) values(?, ?)", 'ss', [$_SESSION['user'], $description]);
         return (object) array('result'=>'Leírás módosítva!', 'description'=>$description);
     }
 
     static function SetEmail($password, $email){
-        $conn = new DB_conn();
-        $stmt = $conn->mysqli->prepare("SELECT user_set_email(?,?,?) AS result ");
-        $stmt->bind_param('sss', $_SESSION['user'], $password, $email);
-        $stmt->execute();
-        $queryResult = $stmt->get_result();
-        $stmt->close();
-        unset($conn);
-
-        if ($queryResult->num_rows == 1){
-            $result = $queryResult->fetch_object();
-            return (object) $result;
-        }
-        return (object) array();
+        return User::Query("SELECT user_set_email(?,?,?) AS result", 'sss', [$_SESSION['user'], $password, $email])[0];
     }
 
 
@@ -224,92 +99,78 @@ class User {
         }
     }
     public static function GetBasic($user){
-        $result = User::GetAnyData($user, "SELECT `user`, `email` FROM `users` WHERE `user`=?")[0];
-        $protects = User::GetAnyData($user, "SELECT user_get_available_protects(?) AS protects")[0];
-        $result = array_merge($result, $protects);
-        if (isset($_SESSION['user']) && $result['user']==$_SESSION['user']) $result['logged'] = 1; else {$result['logged']=0; $result['email']=""; $result['protects']="";};
+        $result = User::Query("SELECT `user`, `email` FROM `users` WHERE `user`=?", 's', [$user])[0];
+        if (isset($_SESSION['user']) && $result['user']==$_SESSION['user']){
+            $protects = User::Query("SELECT user_get_available_protects(?) AS protects", 's', [$user])[0];
+            $result = array_merge($result, $protects);
+            $result['logged'] = 1; 
+        }else{
+            $result['logged']=0; $result['email']=""; $result['protects']="";
+        };
         $result = array_merge($result, (array) User::Subscribed($user));
         $result['basic']=1;
         return $result;
     }  
     public static function GetDescription($user){
-        $result = User::GetAnyData($user, "SELECT `description` FROM `user_descriptions` WHERE `user`=?")[0];
-        return $result;
+        return User::Query("SELECT `description` FROM `user_descriptions` WHERE `user`=?", 's', [$user])[0];
     }  
     public static function GetProfile($user){
-        $result = User::GetAnyData($user, "SELECT `profile` FROM `user_profiles` WHERE `user`=?")[0];
-        return $result;
-    }  
-    static function Subscribed($subscribe){
-        $conn = new DB_conn();
-        $stmt = $conn->mysqli->prepare("SELECT `subscribe` FROM `user_subscribes` WHERE (`user`=? AND `subscribe`=?)");
-        $stmt->bind_param('ss', $_SESSION['user'], $subscribe);
-        $stmt->execute();
-        $queryResult = $stmt->get_result();
-        $stmt->close();
-        unset($conn);
+        return User::Query("SELECT `profile` FROM `user_profiles` WHERE `user`=?", 's', [$user])[0];
+    }
 
-        if ($queryResult->num_rows == 1){
+    static function Subscribed($subscribe){
+        $result = User::Query("select EXISTS(SELECT `subscribe` FROM `user_subscribes` WHERE (`user`=? AND `subscribe`=?)) as `result`", 'ss', [$_SESSION['user'], $subscribe])[0];
+
+        if ($result['result'] == 1){
             return (object) array('subscribed'=>1);
+        }else{
+            return (object) array('subscribed'=>0);
         }
-        return (object) array('subscribed'=>0);
     }
 
     //Felhasználók keresése
     public static function GetAllUser(){
-        return User::GetAnyData(0, "SELECT `user` FROM `users`");
+        return array_column(User::Query("SELECT `user` FROM `users`", '', []), "user", "string");
     }
 
     public static function GetPopular(){
-        return array_column(User::GetAnyData(0, "SELECT `user` FROM `users`"), "user", "string");
+        return array_column(User::Query("SELECT `user` FROM `users`", '', []), "user", "string");
     }
     public static function GetFollowed(){
-        return array_column(User::GetAnyData($_SESSION['user'], "SELECT `subscribe` FROM `user_subscribes` WHERE `user`=?"), "subscribe", "string");
+        return array_column(User::Query("SELECT `subscribe` FROM `user_subscribes` WHERE `user`=?", 's', [$_SESSION['user']]), "subscribe", "string");
     }
     public static function Getburns(){
-        return array_column(User::GetAnyData(0,
-            "   SELECT `subscribe`
-                FROM `user_subscribes` where datediff(current_date(),`date`)<30
-                GROUP BY `subscribe`
-                ORDER BY count(`subscribe`) DESC"
-        ), "subscribe", "string");
+        return array_column(User::Query("SELECT `subscribe`
+        FROM `user_subscribes` where datediff(current_date(),`date`)<30
+        GROUP BY `subscribe`
+        ORDER BY count(`subscribe`) DESC", '', []), "subscribe", "string");
     } 
     public static function GetRecommend(){
-        return array_column(User::GetAnyData($_SESSION['user'],
-            "SELECT `subscribe` FROM
-            (SELECT `subscribe` FROM `user_subscribes` INNER JOIN 
-                (SELECT `user` FROM `user_subscribes` INNER JOIN
-                    (SELECT `subscribe` FROM `user_subscribes` WHERE `user`=?)
-                    AS `subscribed`
-                    ON `subscribed`.`subscribe`=`user_subscribes`.`subscribe`
-                    GROUP BY `user`)
-                AS `mates`
-                ON `user_subscribes`.`user`=`mates`.`user`)
-            AS `possible_offers`
-            GROUP BY `subscribe`
-            ORDER BY count(`subscribe`) DESC
-        "
-        ), "subscribe", "string");
+        return array_column(User::Query("SELECT `subscribe` FROM
+        (SELECT `subscribe` FROM `user_subscribes` INNER JOIN 
+            (SELECT `user` FROM `user_subscribes` INNER JOIN
+                (SELECT `subscribe` FROM `user_subscribes` WHERE `user`=?)
+                AS `subscribed`
+                ON `subscribed`.`subscribe`=`user_subscribes`.`subscribe`
+                GROUP BY `user`)
+            AS `mates`
+            ON `user_subscribes`.`user`=`mates`.`user`)
+        AS `possible_offers`
+        GROUP BY `subscribe`
+        ORDER BY count(`subscribe`) DESC", '', []), "subscribe", "string");
     }
+
+
+
+
+
+
+
+
     static function Search($text, $in){
         $text       = is_null($text)   ? '' : $text;
         $in         = is_null($in)     ? '' : $in;
-
-        $conn = new DB_conn();
-        $stmt = $conn->mysqli->prepare("CALL user_search(?, ?)");
-        $stmt->bind_param('ss', $text, $in);
-        $stmt->execute();
-        $queryResult = $stmt->get_result();
-        $stmt->close();
-        unset($conn);
-
-        $temp = $queryResult->fetch_all(MYSQLI_ASSOC);
-        $temp =  array_column($temp,"user","string");
-        if (count($temp)>0){
-            return  $temp;
-        }else{
-            return array();
-        }
+        return array_column(User::Query("CALL user_search(?, ?)", 'ss', [$text, $in]),"user","string");
     }
 
 
@@ -381,7 +242,7 @@ class User {
     static function requestHandler(){
         if (isset($_GET['request'])){
             switch ($_GET['request']){
-                case 'verification'         : return User::verification($_GET['user'], $_GET['code'])->result; break;
+                case 'verification'         : return User::verification($_GET['user'], $_GET['code'])['result']; break;
                 case 'passwordrecoveryrequest'  : return User::passwordRecoveryRequest($_GET['user']); break;
                 case 'passwordrecovery'     : return User::passwordRecovery($_GET['user'], $_GET['code']); break;
                 case 'basic'                : return User::GetBasic($_GET['user']); break;   
@@ -421,9 +282,6 @@ class User {
             }
         }
     }
-
-
-
 }
 
 
@@ -441,8 +299,6 @@ class User {
 
 $msg = User::requestHandler();
 
-//echo(json_encode(Post::GetAllData('asd','asd'), JSON_UNESCAPED_UNICODE));
-//echo(json_encode(Post::GetAllPost('asd','asd'), JSON_UNESCAPED_UNICODE));
 if ($_GET['ctype']=='img'){
     echo $msg;
 }else{
