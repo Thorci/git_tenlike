@@ -251,11 +251,7 @@ class Post {
                 case 'addlabel'         : return Post::label_add         ($_SESSION['user'], $_POST['id'], $_POST['label']);            break;
                 case 'deletelabel'      : return Post::label_delete      ($_SESSION['user'], $_POST['id'], $_POST['label']);            break;
                 case 'setcategory'      : return Post::category_set      ($_SESSION['user'], $_POST['id'], $_POST['category']);         break;
-                case 'setemoticon'      : return Post::emoticon_set      ($_SESSION['user'], $_POST['id'], $_POST['emoticon']);         break;
                 case 'settitle'         : return Post::title_set         ($_SESSION['user'], $_POST['id'], $_POST['title']);            break;
-                
-
-
                 default:
                     break;
             }
